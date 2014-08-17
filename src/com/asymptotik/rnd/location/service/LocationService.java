@@ -26,9 +26,13 @@ import android.widget.Toast;
 public class LocationService extends Service implements LocationListener {
 
 	//
-	// The max error a location can have before it is sent to the server.
+	// The max error a location can have before it is sent to the BroadcastReceiver.
 	//
 	public static final double LOCATION_ACCURACY_THREASHOLD = 20.0;
+	//
+	// The min distance a location must be from the prior location before it is
+	// sent to the BroadcastReceiver.
+	//
 	public static final double LOCATION_DISTANCE_THREASHOLD = 3.0;
 	
 	private long _count;
@@ -118,7 +122,7 @@ public class LocationService extends Service implements LocationListener {
 			Criteria criteria = new Criteria();
 			criteria.setAccuracy(Criteria.ACCURACY_FINE);
 			criteria.setPowerRequirement(Criteria.POWER_MEDIUM);
-			_locationManager.requestLocationUpdates(5 * 1000l, 5.0f, criteria, this, _serviceLooper);
+			_locationManager.requestLocationUpdates(30 * 1000l, 5.0f, criteria, this, _serviceLooper);
 			_timeSinceStarted = SystemClock.elapsedRealtime();
 			
 			Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
