@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Atk_Rnd_Location</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="label_last_updated">Last Updated:</string>
+    <string name="label_latitude">Latitide:</string>
+    <string name="label_longitude">Longitude:</string>
+    <string name="label_samples">Samples:</string>
+    <string name="label_samples_per_second">Avg Sec/Sample:</string>
+    <string name="label_max_speed">Max Speed:</string>
+    <string name="label_average_speed">Average Speed:</string>
+    <string name="label_accuracy">Accuracy:</string>
+    <string name="button_reset">Reset</string>
+</resources>
