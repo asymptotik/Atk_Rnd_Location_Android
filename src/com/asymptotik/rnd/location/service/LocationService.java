@@ -25,9 +25,17 @@ import android.widget.Toast;
 
 public class LocationService extends Service implements LocationListener {
 
+	//
+	// The max error a location can have before it is sent to the server.
+	//
+	public static final double LOCATION_ACCURACY_THREASHOLD = 20.0;
+	public static final double LOCATION_DISTANCE_THREASHOLD = 3.0;
+	
 	private long _count;
 	private long _timeLastLocationUpdate;
 	private long _timeSinceStarted;
+	
+	private Location _lastValidLocation;
 	
 	//
 	// We use a timer to update the statistic for Last Updated. We want to update this statistic even
@@ -203,20 +211,38 @@ public class LocationService extends Service implements LocationListener {
 	//
 	@Override
 	public void onLocationChanged(Location location) {
-		
-		_count++;
-		
-        Intent localIntent =
-                new Intent(BROADCAST_ACTION)
-                // Puts the status into the Intent
-                .putExtra(EXTENDED_DATA_LOCATION, location)
-                .putExtra(EXTENDED_DATA_COUNT, _count);
-        
-        // Broadcasts the Intent to receivers in this app.
 
-        _timeLastLocationUpdate = SystemClock.elapsedRealtime();
-        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+        //
+        // A location must have a certain accuracy before it is sent to the server.
+		// It must also be LOCATION_DISTANCE_THREASHOLD from the previous Location
+        //
+        if(location.getAccuracy() < LOCATION_ACCURACY_THREASHOLD && this.meetsDistanceThreashold(location)) {
+        	
+        	_count++;
+        	_lastValidLocation = location;
+        	
+	        Intent localIntent =
+	                new Intent(BROADCAST_ACTION)
+	                // Puts the status into the Intent
+	                .putExtra(EXTENDED_DATA_LOCATION, location)
+	                .putExtra(EXTENDED_DATA_COUNT, _count);
+	        
+	        // Broadcasts the Intent to receivers in this app.
+	
+	        _timeLastLocationUpdate = SystemClock.elapsedRealtime();
+
+        	LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+        }
     }
+	
+	private boolean meetsDistanceThreashold(Location location) {
+		boolean ret = false;
+		if(_lastValidLocation == null || location.distanceTo(_lastValidLocation) > LOCATION_DISTANCE_THREASHOLD) {
+			ret = true;
+		}
+		
+		return ret;
+	}
 	
 	@Override
 	public void onProviderDisabled(String provider) {
