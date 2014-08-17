@@ -21,6 +21,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class LocationService extends Service implements LocationListener {
@@ -28,7 +29,7 @@ public class LocationService extends Service implements LocationListener {
 	//
 	// The max error a location can have before it is sent to the BroadcastReceiver.
 	//
-	public static final double LOCATION_ACCURACY_THREASHOLD = 20.0;
+	public static final double LOCATION_ACCURACY_THREASHOLD = 30.0;
 	//
 	// The min distance a location must be from the prior location before it is
 	// sent to the BroadcastReceiver.
@@ -122,7 +123,7 @@ public class LocationService extends Service implements LocationListener {
 			Criteria criteria = new Criteria();
 			criteria.setAccuracy(Criteria.ACCURACY_FINE);
 			criteria.setPowerRequirement(Criteria.POWER_MEDIUM);
-			_locationManager.requestLocationUpdates(30 * 1000l, 5.0f, criteria, this, _serviceLooper);
+			_locationManager.requestLocationUpdates(10 * 1000l, 5.0f, criteria, this, _serviceLooper);
 			_timeSinceStarted = SystemClock.elapsedRealtime();
 			
 			Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
@@ -216,6 +217,9 @@ public class LocationService extends Service implements LocationListener {
 	@Override
 	public void onLocationChanged(Location location) {
 
+		Log.i("LocationService", "location accuracy: " + location.getAccuracy());
+		Log.i("LocationService", "location distance: " + this.distanceTo(location));
+		
         //
         // A location must have a certain accuracy before it is sent to the server.
 		// It must also be LOCATION_DISTANCE_THREASHOLD from the previous Location
@@ -238,6 +242,15 @@ public class LocationService extends Service implements LocationListener {
         	LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
         }
     }
+	
+	private float distanceTo(Location location) {
+		float ret = -1.0f;
+		if(_lastValidLocation != null) {
+			ret = location.distanceTo(_lastValidLocation);
+		}
+		
+		return ret;
+	}
 	
 	private boolean meetsDistanceThreashold(Location location) {
 		boolean ret = false;
